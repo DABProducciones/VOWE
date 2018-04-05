@@ -1,4 +1,4 @@
-var app = angular.module("app", ['agGrid','ngDialog']);
+var app = angular.module("app", ['ngDialog']);
 
 
 app.controller ('Formulario' , function ($scope,$http,ngDialog){
@@ -20,7 +20,7 @@ app.controller ('Formulario' , function ($scope,$http,ngDialog){
         //console.log("LLEGO LA INFO BIEN!, PUEDE ESTAR VACIA PERO PHP NO TIRO ERROR");
         //console.log(DATA.data);
         $scope.DATA = DATA.data;
-        $scope.llenargrilla();
+        console.log(DATA.data);
      },
      function(DATA){
         //ERRROR!!!
@@ -28,104 +28,6 @@ app.controller ('Formulario' , function ($scope,$http,ngDialog){
      });
 
 
-    //esta funcion llena la grilla cabecera dinamica y datos
-    $scope.llenargrilla = function() {
-        var obj = {};
-
-        // cuando esten los datos se llena la grilla.
-        if ($scope.DATA===undefined){
-            return;
-        }else{
-            if (bl==0){                //blanquea por unica vez
-                $scope.rowData=[];
-                $scope.columnDefs=[];
-                bl=1;
-            }
-
-        }
-
-
-        //carga de la cabecera
-
-        $scope.columnDefs.push({headerName: 'ID',
-            field: 'ID'
-            //pinned:'left',
-            //width:110,
-            //suppressMovable:true,
-            //cellStyle: {color: 'black', 'background-color': 'lightgrey'}
-        });
-
-        $scope.columnDefs.push({headerName: 'Imagen',
-            field: 'img'
-            //pinned:'left',
-            //width:110,
-            //suppressMovable:true,
-            //cellStyle: {color: 'black', 'background-color': 'lightgrey'}
-        });
-
-        $scope.columnDefs.push({headerName: 'Descripcion',
-            field: 'desc'
-            //pinned:'left',
-            //width:110,
-            //suppressMovable:true,
-            //cellStyle: {color: 'black', 'background-color': 'lightgrey'}
-        });
-
-        $scope.columnDefs.push({headerName: 'Precio',
-            field: 'Precio'
-            //pinned:'left',
-            //width:110,
-            //suppressMovable:true,
-            //cellStyle: {color: 'black', 'background-color': 'lightgrey'}
-        });
-
-        $scope.columnDefs.push({headerName: 'Activo',
-            field: 'Act'
-            //pinned:'left',
-            //width:110,
-            //suppressMovable:true,
-            //cellStyle: {color: 'black', 'background-color': 'lightgrey'}
-        });
-
-        //console.log($scope.columnDefs);
-
-
-
-
-        //generando las filas de los productor
-        for (var i=0;i<$scope.DATA.length;i++){
-            imagen = $scope.DATA[i].B64.replace(/~/g, "\+");
-            console.log('<img src=\'' + imagen + '\' alt="image" border="0">');
-            obj = JSON.parse('{"ID":"' + $scope.DATA[i].ID +
-                            '","img":"' + '<img src=\'' + imagen + '\' alt="image" border="0">' +
-                            '","desc":"' + $scope.DATA[i].DES +
-                            '","Precio":"' + $scope.DATA[i].PRECIO +
-                            '","Act":"' + $scope.DATA[i].BAJA +
-
-                            '"}');
-            $scope.rowData.push(obj);
-
-        }
-        console.log($scope.rowData);
-
-
-
-        $scope.G.api.setRowData($scope.rowData);
-        $scope.G.api.setColumnDefs($scope.columnDefs);
-
-    };
-
-    //esta funcion completa los colores de las celdas
-    function numberParser(params) {
-        var newValue = params.newValue;
-        var valueAsNumber;
-        if (newValue === null || newValue === undefined || newValue === '') {
-            valueAsNumber = null;
-        } else {
-            valueAsNumber = parseFloat(params.newValue);
-        }
-        return valueAsNumber;
-    }
 
 
     //esta funcion guarda el formulario
@@ -314,137 +216,6 @@ app.controller ('Formulario' , function ($scope,$http,ngDialog){
 
 
     }
-
-    var row_sel = function (g, xpos) {
-        g.api.forEachNode(function (node) {
-            if (node.childIndex === xpos) {node.setSelected(true, true);}
-        });
-    };
-
-/*
-    //esta funcion devuelve el turno y fecha seleccionadas.
-    $scope.SEL = function(){
-
-        //guarda datos de selecciona anterior
-        if (fechasel !== undefined){
-
-            fant=xrow[0].data.ID;
-            cant=fechasel;
-            dant=celldato;
-
-
-            //escribe el dato original de la celda ante nuevo click
-            $scope.rowData[fant][cant]=dant;
-        }
-
-        //seleccion de celda
-        xrow=$scope.G.api.getSelectedNodes();   //fila seleccionada
-        if (xrow.length!==0){  // exepcion no se puede seleccionar el titulo
-            fechasel=$scope.G.api.getFocusedCell().column.colDef.field;     //fecha completa seleccionada o columna
-            if (fechasel!=="turno"){ //exepcion no se puede seleccionar la primer columna
-                horario=xrow[0].data.turno;             //turno seleccionado
-                nfechsel=$scope.G.api.getFocusedCell().column.colDef.headerName;//cabecera de fecha seleccionada
-                celldato=$scope.rowData[xrow[0].data.ID][fechasel]  //dato de la fecha seleccionada
-                oldxrow=xrow;
-                oldfechasel=fechasel;
-            }else{
-                fechasel=oldfechasel;
-                xrow=oldxrow;
-            }
-
-        }else{
-            xrow=oldxrow;
-
-        }
-
-
-
-        if(dant!==celldato){$scope.INS.OK="";}
-
-        $scope.INS.FECH = fechasel;
-        $scope.INS.HH = horario;
-        $scope.PRECIO=P[0];
-
-        switch (celldato) {
-            case undefined:
-                $scope.mensaje="";
-                break;
-
-            case 0: //selecciono Domingo
-                $scope.mensaje="Los turnos de domingo tienen costo extra";
-                $scope.PRECIO=P[1];
-
-                break;
-
-            case 6: //selecciono Sabado
-                $scope.mensaje="Los turnos de Sabado tienen costo extra";
-                $scope.PRECIO=P[2];
-                break;
-
-            case 7: //selecciono Feriado
-                $scope.mensaje="Los turnos de Feriado tienen costo extra";
-                $scope.PRECIO=P[3];
-                break;
-
-            case 1: //selecciono ya Utilizado.
-            case 2: //fecha utilizada falsa.
-            case 4: //fecha utilizada falza forzada.
-                $scope.mensaje="La fecha esta ocupada, seleccione otra fecha";
-                //$scope.PRECIO="";
-                $scope.PRECIO=P[4];
-                fechasel = "";  //blanqueo las fechas para que no se valide esa opcion
-                horario = "";
-                nfechsel= $scope.mensaje;
-                break;
-
-            default: //caso no ponderado
-                $scope.mensaje="Caso no ponderado Error "+celldato;
-                fechasel = "";  //blanqueo las fechas para que no se valide esa opcion
-                horario = "";
-                nfechsel="";
-        }
-        $scope.INS.FECH = fechasel;
-        $scope.INS.HH = horario;
-
-
-
-        $scope.rowData[xrow[0].data.ID][fechasel]=3;
-        $scope.G.api.setRowData($scope.rowData);
-        //$scope.G.api.setColumnDefs($scope.columnDefs);
-
-        $scope.fechsel= nfechsel + ". " + horario;
-
-
-
-
-    }//fin de la funcion SEL()
-*/
-    //funcion de grilla filas
-    $scope.rows = function (g) {
-        return g.api.getDisplayedRowCount();
-        //return g.api.getRowNode($scope.rowData);
-    };
-
-    //funcion de grilla fila
-    $scope.row = function (g) {
-        if (g.api.getSelectedNodes().length === 0) {
-            return $scope.rows(g);
-            //return "si";
-        } else {
-            var xrow = g.api.getSelectedNodes();
-            return parseInt(xrow[0].childIndex);
-            //return "no";
-        }
-    };
-
-    //parametrizacion de grilla
-    $scope.G = {
-        columnDefs:null,
-        rowData: null,
-        rowSelection: 'single'
-        //enableColResize:true,
-        //onGridReady: function(){$scope.G.api.setRowData($scope.rowData)}
-    };
 
 });// fin controlador
 
