@@ -1,5 +1,3 @@
-agGrid.initialiseAgGridWithAngular1(angular);
-
 var app = angular.module("app", ['agGrid','ngDialog']);
 
 
